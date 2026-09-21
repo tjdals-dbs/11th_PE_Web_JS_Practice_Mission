@@ -1,31 +1,38 @@
-import { createContext, useContext, useState } from "react";
-import { use } from "react";;
-
-type StudyMode = "focus" | "break";
-
-const StudyModeContext = createContext<StudyMode>("focus");
-
-function StudyModeStatus() {
-  const studyMode = use(StudyModeContext);
-
-  return <p>현재 스터디 모드: {studyMode}</p>;
-}
+import { useState } from "react";
+import { Header } from "./components/header";
+import { MovieGrid } from "./components/movie-grid";
+import { Pagination } from "./components/pagination";
+import { movies } from "./data/movies";
+import type { Movie } from "./types/movie";
+import "./App.css";
 
 export default function App() {
-  const [studyMode, setStudyMode] = useState<StudyMode>("focus");
+  const [movieList, setMovieList] = useState<Movie[]>(movies);
 
-  function handleToggleStudyMode() {
-    setStudyMode((currentStudyMode) =>
-      currentStudyMode === "focus" ? "break" : "focus"
+  function handleBookmarkToggle(movieId: number) {
+    setMovieList((currentMovies) =>
+      currentMovies.map((movie) =>
+        movie.id === movieId
+          ? { ...movie, isBookmarked: !movie.isBookmarked }
+          : movie,
+      ),
     );
   }
 
   return (
-    <StudyModeContext value={studyMode}>
-      <StudyModeStatus />
-      <button onClick={handleToggleStudyMode}>
-        스터디 모드 바꾸기
-      </button>
-    </StudyModeContext>
+    <div className="app-shell">
+      <Header />
+      <main className="movie-list-page">
+        <div className="page-heading">
+          <h1>영화 목록</h1>
+        </div>
+        <MovieGrid movies={movieList} onBookmarkToggle={handleBookmarkToggle} />
+        <Pagination currentPage={1} totalPages={3} />
+      </main>
+      <footer className="site-footer">
+        <img src="/images/logos/tmdb-logo.svg" alt="TMDB" />
+        <span>This product uses the TMDB API but is not endorsed or certified by TMDB.</span>
+      </footer>
+    </div>
   );
 }
